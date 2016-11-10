@@ -120,7 +120,7 @@ namespace NuGet.ProjectModel
         /// </summary>
         public PackageSpec Clone()
         {
-            var writer = new NuGet.Common.JsonWriter();
+            var writer = new JsonWriter();
             PackageSpecWriter.Write(this, writer);
             var json = JObject.Parse(writer.ToString());
 

@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using NuGet.Common;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 
@@ -41,7 +40,7 @@ namespace NuGet.RuntimeModel
 
         public static void WriteRuntimeGraph(string filePath, RuntimeGraph runtimeGraph)
         {
-            var writer = new NuGet.Common.JsonWriter();
+            var writer = new JsonWriter();
 
             WriteRuntimeGraph(writer, runtimeGraph);
 
@@ -140,10 +139,9 @@ namespace NuGet.RuntimeModel
         {
             writer.WriteObjectStart(data.Name);
 
-            var sortedFrameworkGroups = data.RestoreContexts.GroupBy(context => context.Framework)
-                                            .OrderBy(pair => pair.Key.DotNetFrameworkName);
+            var frameworkGroups = data.RestoreContexts.GroupBy(context => context.Framework);
 
-            foreach (var frameworkGroup in sortedFrameworkGroups)
+            foreach (var frameworkGroup in frameworkGroups)
             {
                 var name = frameworkGroup.Key.GetShortFolderName();
                 var runtimes = frameworkGroup.ToList();

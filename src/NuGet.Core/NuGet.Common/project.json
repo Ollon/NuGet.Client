@@ -27,9 +27,6 @@
         "System.Core": "",
         "System.IO.Compression": ""
       },
-      "dependencies": {
-        "Newtonsoft.Json": "6.0.4"
-      },
       "buildOptions": {
         "define": [
           "IS_DESKTOP"
@@ -39,7 +36,6 @@
     "netstandard1.3": {
       "dependencies": {
         "NETStandard.Library": "1.6.0",
-        "Newtonsoft.Json": "9.0.1",
         "System.Security.Cryptography.Algorithms": "4.2.0",
         "System.Diagnostics.Process": "4.1.0",
         "System.Threading.Thread": "4.0.0"

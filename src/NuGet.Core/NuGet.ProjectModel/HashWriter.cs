@@ -3,37 +3,28 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using NuGet.Common;
+using System.IO;
+using Newtonsoft.Json;
+using NuGet.RuntimeModel;
 
 namespace NuGet.ProjectModel
 {
     /// <summary>
     /// Generates a hash from an object graph.
-    /// 
+    ///
     /// This is non-private only to facilitate unit testing.
     /// </summary>
     public sealed class HashWriter : IObjectWriter, IDisposable
     {
         private const int _defaultBufferSize = 4096;
 
-        // These delimiters are important in preserving the structure of an object map.
-        // Although the values were chosen out of familiarly with JSON, other values could be used.
-        private static readonly byte[] _null = new[] { (byte)0 };
-        private static readonly byte[] _nameValueSeparator = new[] { (byte)':' };
-        private static readonly byte[] _objectStart = new[] { (byte)'{' };
-        private static readonly byte[] _objectEnd = new[] { (byte)'}' };
-        private static readonly byte[] _stringStart = new[] { (byte)'"' };
-        private static readonly byte[] _stringEnd = new[] { (byte)'"' };
-        private static readonly byte[] _arrayStart = new[] { (byte)'[' };
-        private static readonly byte[] _arrayEnd = new[] { (byte)']' };
-        private static readonly byte[] _separator = new[] { (byte)',' };
-
         private readonly byte[] _buffer;
         private readonly IHashFunction _hashFunc;
         private bool _isReadOnly;
         private int _nestLevel;
-        private int _position;
+        private CircularMemoryStream _stream;
+        private StreamWriter _streamWriter;
+        private JsonTextWriter _writer;
 
         /// <summary>
         /// Creates a new instance with the provide hash function.
@@ -46,13 +37,25 @@ namespace NuGet.ProjectModel
                 throw new ArgumentNullException(nameof(hashFunc));
             }
 
-            _hashFunc = hashFunc;
             _buffer = new byte[_defaultBufferSize];
+            _hashFunc = hashFunc;
+            _stream = new CircularMemoryStream(_buffer);
+            _streamWriter = new StreamWriter(_stream);
+            _writer = new JsonTextWriter(_streamWriter);
+
+            _stream.OnFlush += OnFlush;
+
+            _writer.WriteStartObject();
         }
 
         public void Dispose()
         {
+            _stream.OnFlush -= OnFlush;
+
             _hashFunc.Dispose();
+            _writer.Close();
+            _streamWriter.Dispose();
+            _stream.Dispose();
         }
 
         public void WriteObjectStart(string name)
@@ -64,9 +67,8 @@ namespace NuGet.ProjectModel
 
             ThrowIfReadOnly();
 
-            Write(name);
-            Write(_nameValueSeparator);
-            Write(_objectStart);
+            _writer.WritePropertyName(name);
+            _writer.WriteStartObject();
 
             ++_nestLevel;
         }
@@ -80,8 +82,7 @@ namespace NuGet.ProjectModel
                 throw new InvalidOperationException();
             }
 
-            Write(_objectEnd);
-            Write(_separator);
+            _writer.WriteEndObject();
 
             --_nestLevel;
         }
@@ -95,10 +96,8 @@ namespace NuGet.ProjectModel
 
             ThrowIfReadOnly();
 
-            Write(name);
-            Write(_nameValueSeparator);
-            Write(BitConverter.GetBytes(value));
-            Write(_separator);
+            _writer.WritePropertyName(name);
+            _writer.WriteValue(value);
         }
 
         public void WriteNameValue(string name, string value)
@@ -110,10 +109,8 @@ namespace NuGet.ProjectModel
 
             ThrowIfReadOnly();
 
-            Write(name);
-            Write(_nameValueSeparator);
-            Write(value);
-            Write(_separator);
+            _writer.WritePropertyName(name);
+            _writer.WriteValue(value);
         }
 
         public void WriteNameArray(string name, IEnumerable<string> values)
@@ -125,27 +122,15 @@ namespace NuGet.ProjectModel
 
             ThrowIfReadOnly();
 
-            Write(name);
-            Write(_nameValueSeparator);
+            _writer.WritePropertyName(name);
+            _writer.WriteStartArray();
 
-            if (values == null)
+            foreach (var value in values)
             {
-                Write(_null);
-            }
-            else
-            {
-                Write(_arrayStart);
-
-                foreach (var value in values)
-                {
-                    Write(value);
-                    Write(_separator);
-                }
-
-                Write(_arrayEnd);
+                _writer.WriteValue(value);
             }
 
-            Write(_separator);
+            _writer.WriteEndArray();
         }
 
         /// <summary>
@@ -156,59 +141,22 @@ namespace NuGet.ProjectModel
         /// <returns>A hash of the object.</returns>
         public string GetHash()
         {
-            _isReadOnly = true;
+            if (!_isReadOnly)
+            {
+                _writer.WriteEndObject();
+                _writer.Flush();
 
-            Flush();
+                _isReadOnly = true;
+            }
 
             return _hashFunc.GetHash();
         }
 
-        private void FlushIfFull()
+        private void OnFlush(object sender, ArraySegment<byte> bytes)
         {
-            if (_position == _buffer.Length)
+            if (bytes.Count > 0)
             {
-                Flush();
-            }
-        }
-
-        private void Flush()
-        {
-            if (_position > 0)
-            {
-                _hashFunc.Update(_buffer, offset: 0, count: _position);
-
-                _position = 0;
-            }
-        }
-
-        private void Write(string value)
-        {
-            if (value == null)
-            {
-                Write(_null);
-            }
-            else
-            {
-                Write(_stringStart);
-                Write(Encoding.UTF8.GetBytes(value));
-                Write(_stringEnd);
-            }
-        }
-
-        private void Write(byte[] bytes)
-        {
-            int bytesWritten = 0;
-
-            while (bytesWritten < bytes.Length)
-            {
-                int bytesToWrite = Math.Min(_buffer.Length - _position, bytes.Length - bytesWritten);
-
-                Buffer.BlockCopy(bytes, bytesWritten, _buffer, _position, bytesToWrite);
-
-                _position += bytesToWrite;
-                bytesWritten += bytesToWrite;
-
-                FlushIfFull();
+                _hashFunc.Update(bytes.Array, bytes.Offset, bytes.Count);
             }
         }
 

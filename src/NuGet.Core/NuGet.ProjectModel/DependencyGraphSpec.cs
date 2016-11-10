@@ -180,7 +180,7 @@ namespace NuGet.ProjectModel
             }
         }
 
-        public static  DependencyGraphSpec Union(IEnumerable<DependencyGraphSpec> dgSpecs )
+        public static DependencyGraphSpec Union(IEnumerable<DependencyGraphSpec> dgSpecs)
         {
             var projects =
                 dgSpecs.SelectMany(e => e.Projects)
@@ -221,7 +221,7 @@ namespace NuGet.ProjectModel
 
         private string GetJson()
         {
-            var writer = new NuGet.Common.JsonWriter();
+            var writer = new RuntimeModel.JsonWriter();
 
             Write(writer);
 
@@ -280,7 +280,7 @@ namespace NuGet.ProjectModel
             }
         }
 
-        private void Write(IObjectWriter writer)
+        private void Write(RuntimeModel.IObjectWriter writer)
         {
             writer.WriteNameValue("format", 1);
 
@@ -342,8 +342,8 @@ namespace NuGet.ProjectModel
 
             foreach (var package in packages)
             {
-                if (package.RestoreMetadata.TargetFrameworks.SelectMany(r=> r.ProjectReferences).Any(dependency =>
-                        string.Equals(projectUniqueName, dependency.ProjectUniqueName, StringComparison.OrdinalIgnoreCase)))
+                if (package.RestoreMetadata.TargetFrameworks.SelectMany(r => r.ProjectReferences).Any(dependency =>
+                    string.Equals(projectUniqueName, dependency.ProjectUniqueName, StringComparison.OrdinalIgnoreCase)))
                 {
                     count++;
                 }

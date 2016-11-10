@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace NuGet.Common
+namespace NuGet.RuntimeModel
 {
     /// <summary>
     /// Provides functionality for writing an object graph.

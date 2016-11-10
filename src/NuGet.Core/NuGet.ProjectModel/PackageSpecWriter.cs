@@ -83,7 +83,7 @@ namespace NuGet.ProjectModel
                 throw new ArgumentException(Strings.ArgumentNullOrEmpty, nameof(filePath));
             }
 
-            var writer = new NuGet.Common.JsonWriter();
+            var writer = new RuntimeModel.JsonWriter();
 
             Write(packageSpec, writer);
 
@@ -159,11 +159,9 @@ namespace NuGet.ProjectModel
             {
                 writer.WriteObjectStart("frameworks");
 
-                var frameworks = msbuildMetadata.TargetFrameworks
-                                                .OrderBy(framework => framework.FrameworkName.DotNetFrameworkName);
                 var frameworkNames = new HashSet<string>();
 
-                foreach (var framework in frameworks)
+                foreach (var framework in msbuildMetadata.TargetFrameworks)
                 {
                     var frameworkName = framework.FrameworkName.GetShortFolderName();
 
@@ -175,10 +173,7 @@ namespace NuGet.ProjectModel
 
                         writer.WriteObjectStart("projectReferences");
 
-                        var sortedProjectReferences = framework.ProjectReferences
-                                                               .OrderBy(reference => reference.ProjectUniqueName, StringComparer.Ordinal);
-
-                        foreach (var project in sortedProjectReferences)
+                        foreach (var project in framework.ProjectReferences)
                         {
                             writer.WriteObjectStart(project.ProjectUniqueName);
 
@@ -275,8 +270,6 @@ namespace NuGet.ProjectModel
                 return;
             }
 
-            libraryDependencies = libraryDependencies.OrderBy(library => library.Name, StringComparer.Ordinal);
-
             writer.WriteObjectStart(name);
 
             foreach (var dependency in libraryDependencies)
@@ -347,10 +340,9 @@ namespace NuGet.ProjectModel
         {
             if (frameworks?.Any() == true)
             {
-                var sortedImports = frameworks.Select(framework => framework.GetShortFolderName())
-                                              .OrderBy(name => name, StringComparer.Ordinal);
+                var imports = frameworks.Select(framework => framework.GetShortFolderName());
 
-                writer.WriteNameArray("imports", sortedImports);
+                writer.WriteNameArray("imports", imports);
             }
         }
 
@@ -360,9 +352,7 @@ namespace NuGet.ProjectModel
             {
                 writer.WriteObjectStart("frameworks");
 
-                var sortedFrameworks = frameworks.OrderBy(framework => framework.FrameworkName.DotNetFrameworkName, StringComparer.Ordinal);
-
-                foreach (var framework in sortedFrameworks)
+                foreach (var framework in frameworks)
                 {
                     writer.WriteObjectStart(framework.FrameworkName.GetShortFolderName());
 
@@ -382,9 +372,7 @@ namespace NuGet.ProjectModel
             {
                 writer.WriteObjectStart("tools");
 
-                var sortedTools = tools.OrderBy(tool => tool.LibraryRange.Name, StringComparer.Ordinal);
-
-                foreach (var tool in sortedTools)
+                foreach (var tool in tools)
                 {
                     writer.WriteObjectStart(tool.LibraryRange.Name);
                     writer.WriteNameValue("version", tool.LibraryRange.VersionRange.ToNormalizedString());
@@ -413,8 +401,6 @@ namespace NuGet.ProjectModel
         {
             if (values != null && values.Any())
             {
-                values = values.OrderBy(value => value, StringComparer.Ordinal);
-
                 writer.WriteNameArray(name, values);
             }
         }

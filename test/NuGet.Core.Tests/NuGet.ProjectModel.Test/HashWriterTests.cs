@@ -33,7 +33,7 @@ namespace NuGet.ProjectModel.Test
         [Fact]
         public void GetHash_HasDefaultValue()
         {
-            const string expectedHash = "z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg==";
+            const string expectedHash = "J8dGcK23UHX60FjVzq97IMTneGyDuuijL2Jvl4KvNMmjPCBG72D9Knh403jin+yFGAa72aZ4ePOp8c2kgwdj/Q==";
             var actualHash = _writer.GetHash();
 
             Assert.Equal(expectedHash, actualHash);
@@ -48,7 +48,7 @@ namespace NuGet.ProjectModel.Test
             _writer.WriteNameArray("e", new[] { "f", "g" });
             _writer.WriteObjectEnd();
 
-            const string expectedHash = "+cbiB6wM9JcGB60IhxKr6VYXLC0bwr4/3u3aX1Z8m1UB3XTU+uGHA5NG56RA2OpKa5YNx3Jrrj4cbnt8ucrrUw==";
+            const string expectedHash = "TGP0LarTsGYQ2bqAC8lWyRQR+JsKzsO0Y+h6w7mtTj6mBOLTy8Dr0ZypSgzwzD9xuddh2ceDT7fEXve5ohuNeQ==";
             var actualHash = _writer.GetHash();
 
             Assert.Equal(expectedHash, actualHash);
@@ -74,7 +74,7 @@ namespace NuGet.ProjectModel.Test
             _writer.WriteObjectStart(name: "");
             _writer.WriteObjectEnd();
 
-            const string expectedHash = "Pkux5n7tdf8w4+XzErvaXVx06XnacoeFmxa3EH8c0xPVXd1o4sDdgAWB86ifBaqzEgb9yCPWR5TQ3wyo4ENrBw==";
+            const string expectedHash = "knKxm5x6Jpr2pv4LPmgc9Vt/eR3n4kSCkc18RMfY78x9B52j8BHbj0MjOK99Y28IcIpRppus2d/JoX/p5+jZHA==";
             var actualHash = _writer.GetHash();
 
             Assert.Equal(expectedHash, actualHash);
@@ -115,7 +115,7 @@ namespace NuGet.ProjectModel.Test
         {
             _writer.WriteNameValue(name: "", value: 3);
 
-            const string expectedHash = "3UonDw6IeP0q7BYNiUKgTfOawoxaFTNOspWyeHa3yhIXJ0F/PXBLcQNz/Ycmpu9IEmJGy3SXglCU7wanFoIjzQ==";
+            const string expectedHash = "TnmYxd+nupymXRi9r+MPlKYv2xrgnd4owbVaJur49jN3sm2bQKXkFwBJIA+NlEArnz4QoMFJmomlXJDExHZKMQ==";
             var actualHash = _writer.GetHash();
 
             Assert.Equal(expectedHash, actualHash);
@@ -140,7 +140,7 @@ namespace NuGet.ProjectModel.Test
         {
             _writer.WriteNameValue(name: "", value: "");
 
-            const string expectedHash = "PI9IdNQHcprUKZ9FGde3Nog0QeqfWRA1XyLVquluf+9p+RPYNivEI4SuwF9lMwhJ8h0yYrpl2eZbuPp8nGi7pg==";
+            const string expectedHash = "rRT9i81nhJdNPYfhfGo8b7u0lFCjmweC7fi4Gs3bE3aNzMrMLetck4BSgHTJ8DxbzomkNRsYNFKdROBep1HIXw==";
             var actualHash = _writer.GetHash();
 
             Assert.Equal(expectedHash, actualHash);
@@ -165,7 +165,7 @@ namespace NuGet.ProjectModel.Test
         {
             _writer.WriteNameArray(name: "", values: Enumerable.Empty<string>());
 
-            const string expectedHash = "UbQXYQqZBQimhCwrfdh5JxNlcnmd8ztS0HCD7fpXMgvH+GJf218j7+0UsF/X0a09iOhRYgAqD8I8wsspGR11Iw==";
+            const string expectedHash = "KPMSRUKjEBMaUdDcHOxPO/bVXtH5ITcjM9/Fq/BhWy4v9ZJxkOA0rMe7+6Uxc+s6bLv+zTcr4O+UfJ7ksu5k1Q==";
             var actualHash = _writer.GetHash();
 
             Assert.Equal(expectedHash, actualHash);

@@ -4,13 +4,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
-using NuGet.Common;
 using NuGet.Configuration;
 using NuGet.Frameworks;
 using NuGet.LibraryModel;
 using NuGet.Test.Utility;
 using Xunit;
 using NuGet.Versioning;
+using System.IO;
 
 namespace NuGet.ProjectModel.Test
 {
@@ -232,7 +232,7 @@ namespace NuGet.ProjectModel.Test
             msbuildMetadata.LegacyPackagesDirectory = true;
 
             // Act
-            var writer = new JsonWriter();
+            var writer = new RuntimeModel.JsonWriter();
             PackageSpecWriter.Write(spec, writer);
             var json = writer.GetJson();
             var readSpec = JsonPackageSpecReader.GetPackageSpec(json, "x", "c:\\fake\\project.json");
@@ -302,7 +302,7 @@ namespace NuGet.ProjectModel.Test
             tfmGroup2.ProjectReferences.Add(ref1);
             tfmGroup2.ProjectReferences.Add(ref2);
 
-            var writer = new JsonWriter();
+            var writer = new RuntimeModel.JsonWriter();
 
             // Act
             PackageSpecWriter.Write(spec, writer);
@@ -324,6 +324,43 @@ namespace NuGet.ProjectModel.Test
                 Assert.Equal(LibraryIncludeFlags.All, references[1].IncludeAssets);
                 Assert.Equal(LibraryIncludeFlags.None, references[1].ExcludeAssets);
                 Assert.Equal(LibraryIncludeFlagUtils.DefaultSuppressParent, references[1].PrivateAssets);
+            }
+        }
+
+        [Fact]
+        public void DependencyGraphSpec_Save_SerializesMembersAsJson()
+        {
+            var expectedJson = ResourceTestUtility.GetResource("NuGet.ProjectModel.Test.compiler.resources.DependencyGraphSpec_Save_SerializesMembersAsJson.json", typeof(DependencyGraphSpecTests));
+            var dependencyGraphSpec = CreateDependencyGraphSpec();
+            var actualJson = GetJson(dependencyGraphSpec);
+
+            Assert.Equal(expectedJson, actualJson);
+        }
+
+        private static DependencyGraphSpec CreateDependencyGraphSpec()
+        {
+            var dgSpec = new DependencyGraphSpec();
+
+            dgSpec.AddRestore("b");
+            dgSpec.AddRestore("a");
+            dgSpec.AddRestore("c");
+
+            dgSpec.AddProject(new PackageSpec(rawProperties: null) { RestoreMetadata = new ProjectRestoreMetadata() { ProjectUniqueName = "b" } });
+            dgSpec.AddProject(new PackageSpec(rawProperties: null) { RestoreMetadata = new ProjectRestoreMetadata() { ProjectUniqueName = "a" } });
+            dgSpec.AddProject(new PackageSpec(rawProperties: null) { RestoreMetadata = new ProjectRestoreMetadata() { ProjectUniqueName = "c" } });
+
+            return dgSpec;
+        }
+
+        private static string GetJson(DependencyGraphSpec dgSpec)
+        {
+            using (var testDirectory = TestDirectory.Create())
+            {
+                var filePath = Path.Combine(testDirectory.Path, "out.json");
+
+                dgSpec.Save(filePath);
+
+                return File.ReadAllText(filePath);
             }
         }
     }

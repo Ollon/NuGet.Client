@@ -5,13 +5,12 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using NuGet.Common;
 
-namespace NuGet.Common
+namespace NuGet.RuntimeModel
 {
     /// <summary>
     /// Generates JSON from an object graph.
-    /// 
+    ///
     /// This is non-private only to facilitate unit testing.
     /// </summary>
     public sealed class JsonWriter : IObjectWriter
@@ -113,7 +112,6 @@ namespace NuGet.Common
         ///
         /// Once WriteTo is called, no further writing is allowed.
         /// </summary>
-        /// <returns>A hash of the object.</returns>
         public void WriteTo(JsonTextWriter writer)
         {
             if (writer == null)
