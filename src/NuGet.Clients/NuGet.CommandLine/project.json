@@ -1,7 +1,5 @@
 {
   "dependencies": {
-    "Microsoft.Build": "14.3.0",
-    "Microsoft.Build.Framework": "14.3.0",
     "NuGet.ProjectManagement": "4.0.0-*",
     "NuGet.PackageManagement": "4.0.0-*",
     "NuGet.Protocol.Core.v2": "4.0.0-*",

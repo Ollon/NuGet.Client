@@ -1,7 +1,5 @@
 ﻿# Assemblies needed to create merged NuGet.exe
 
-Microsoft.Build.dll
-Microsoft.Build.Framework.dll
 Microsoft.Web.XmlTransform.dll
 Newtonsoft.Json.dll
 NuGet.Build.Tasks.dll
