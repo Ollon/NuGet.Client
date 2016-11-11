@@ -461,7 +461,7 @@ namespace NuGetConsole.Implementation.Console
                 if (IsStarted)
                 {
                     // Filter out noise. A host could execute private commands.
-                    Debug.Assert(IsExecuting);
+                    //Debug.Assert(IsExecuting);
                     IsExecuting = false;
 
                     PromptNewLine();
